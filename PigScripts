@@ -15,4 +15,24 @@ Jorge Posada    New York Yankees        {(Catcher),(Designated_hitter)} [games#1
 
 baseball = load '/pig/baseball' as (name:chararray, team:chararray, postition:bag{t:(p:chararray)}, bat:map[]);
 mydata = foreach baseball generate name, bat#'base_on_balls' - bat#'ibbs'
-© 2018 GitHub, Inc.
+
+
+PIG CUBE, group.
+.....................
+people = LOAD '/pig/people.csv' USING PigStorage(',') AS (name:chararray, country:chararray,gender:chararray, sport:chararray, height:float);
+2   grouped = GROUP people by gender;
+3   height = foreach grouped generate group as gender, COUNT(people) as count,AVG(people.height) as avgheight;
+4   grouped = GROUP people by (gender,sport);
+5   height = foreach grouped generate FLATTEN(group) as (gender,sport), COUNT(people) as count,AVG(people.height) as avgheight;
+6   cube = CUBE people by CUBE(gender,sport);
+7   people = LOAD '/pig/people.csv' USING PigStorage(',') AS (name:chararray, country:chararray,gender:chararray, sport:chararray, height:float);
+8   cube = CUBE people by CUBE(gender,sport);
+9   height = foreach cube generate FLATTEN(group) as (gender,sport), COUNT(cube) as count,AVG(cube.height) as avgheight;
+10   height = foreach cube generate FLATTEN(group) as (gender,sport), COUNT_STAR(cube) as count,AVG(cube.height) as avgheight;
+11   people = LOAD '/pig/people.csv' USING PigStorage(',') AS (name:chararray, country:chararray,gender:chararray, sport:chararray, height:float);
+12   cube = CUBE people by CUBE(gender,sport);
+13   height = foreach cube generate FLATTEN(group) as (gender,sport), COUNT_STAR(cube) as count,AVG(cube.height) as avgheight;
+14   height = foreach cube generate FLATTEN(group) as (gender,sport), COUNT_STAR(cube) as count,AVG(cube.height) as avgheight;
+15   heights = foreach  height generate (gender is not NULL ? gender:'*') as gender , (sport is not NULL ? sport:'*') as sport,count,avgheight;
+
+
